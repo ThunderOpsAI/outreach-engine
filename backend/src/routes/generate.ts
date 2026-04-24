@@ -1,9 +1,8 @@
-import { Router } from 'express';
+import { Router } from 'express'
+import { generateOutreach } from '../controllers/generateController.js'
 
-const router = Router();
+const router = Router()
 
-router.post('/outreach', (req, res) => {
-  res.status(501).json({ message: 'Not implemented - Phase 4' });
-});
+router.post('/outreach', generateOutreach)
 
-export default router;
+export default router
