@@ -2,6 +2,7 @@
   "name": "outreach-engine",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -16,7 +17,10 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "helmet": "^8.1.0",
     "ioredis": "^5.10.1",
     "next": "^16.2.4",
     "react": "^19.2.5",
@@ -25,6 +29,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
