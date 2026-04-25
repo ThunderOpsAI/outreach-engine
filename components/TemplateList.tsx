@@ -1,16 +1,22 @@
-import { useState, useEffect } from 'react'
-import { getTemplates, createTemplate, deleteTemplate, type Template } from '../lib/api.js'
+'use client'
 
-interface TemplateListProps {
-  onApplyTemplate: (template: Template) => void
-  currentOutput?: any // GenerateOutput or null
+import { useEffect, useState } from 'react'
+import { getTemplates, deleteTemplate } from '@/lib/api'
+
+interface Template {
+  id: string
+  name: string
+  tone: string
+  structure: any
 }
 
-export function TemplateList({ onApplyTemplate, currentOutput }: TemplateListProps) {
+interface TemplateListProps {
+  onSelect: (template: Template) => void
+}
+
+export default function TemplateList({ onSelect }: TemplateListProps) {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [templateName, setTemplateName] = useState('')
 
   useEffect(() => {
     loadTemplates()
@@ -20,85 +26,54 @@ export function TemplateList({ onApplyTemplate, currentOutput }: TemplateListPro
     try {
       const data = await getTemplates()
       setTemplates(data)
-    } catch (error) {
-      console.error('Failed to load templates:', error)
+    } catch (err) {
+      console.error('Failed to load templates:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSaveTemplate = async () => {
-    if (!currentOutput || !templateName.trim()) return
-
-    setSaving(true)
-    try {
-      await createTemplate(templateName, 'direct', currentOutput)
-      setTemplateName('')
-      await loadTemplates()
-    } catch (error) {
-      console.error('Failed to save template:', error)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleDeleteTemplate = async (id: string) => {
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure?')) return
     try {
       await deleteTemplate(id)
-      await loadTemplates()
-    } catch (error) {
-      console.error('Failed to delete template:', error)
+      setTemplates(templates.filter(t => t.id !== id))
+    } catch (err) {
+      alert('Failed to delete template')
     }
   }
 
-  if (loading) {
-    return <div>Loading templates...</div>
-  }
+  if (loading) return <div className="text-sm text-gray-500">Loading templates...</div>
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium">Templates</h2>
-
-      {currentOutput && (
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Template name"
-            value={templateName}
-            onChange={(e) => setTemplateName(e.target.value)}
-            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          <button
-            onClick={handleSaveTemplate}
-            disabled={saving || !templateName.trim()}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save'}
-          </button>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        {templates.map((template) => (
-          <div key={template.id} className="flex justify-between items-center border rounded p-2">
-            <span>{template.name}</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => onApplyTemplate(template)}
-                className="text-sm bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded"
+    <div className="space-y-2">
+      <h2 className="text-lg font-semibold text-gray-900">Saved Templates</h2>
+      {templates.length === 0 ? (
+        <p className="text-sm text-gray-500 italic">No templates saved yet.</p>
+      ) : (
+        <div className="grid gap-2">
+          {templates.map((template) => (
+            <div
+              key={template.id}
+              className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
+            >
+              <div
+                className="flex-1 cursor-pointer"
+                onClick={() => onSelect(template)}
               >
-                Apply
-              </button>
+                <p className="text-sm font-medium text-gray-900">{template.name}</p>
+                <p className="text-xs text-gray-500 capitalize">{template.tone}</p>
+              </div>
               <button
-                onClick={() => handleDeleteTemplate(template.id)}
-                className="text-sm bg-red-100 hover:bg-red-200 px-2 py-1 rounded"
+                onClick={() => handleDelete(template.id)}
+                className="text-xs text-red-600 hover:text-red-800 p-1"
               >
                 Delete
               </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

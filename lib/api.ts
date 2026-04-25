@@ -1,70 +1,83 @@
-import type { GenerateRequest, GenerateResponse } from './types.js'
+import { createClient } from '@/lib/supabase'
+import type { GenerateRequest, GenerateResponse, ErrorCode } from '@/lib/types'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
 
-export async function generateOutreach(request: GenerateRequest): Promise<GenerateResponse> {
+async function getAuthHeaders() {
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  if (!session) {
+    throw new Error('UNAUTHORISED')
+  }
+
+  return {
+    'Authorization': `Bearer ${session.access_token}`,
+    'Content-Type': 'application/json'
+  }
+}
+
+export async function generateOutreach(data: GenerateRequest): Promise<GenerateResponse> {
+  const headers = await getAuthHeaders()
+  
   const response = await fetch(`${BACKEND_URL}/api/v1/generate/outreach`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(request),
+    headers,
+    body: JSON.stringify(data)
   })
 
   if (!response.ok) {
     const error = await response.json()
-    throw new Error(error.message || 'Generation failed')
+    throw error
   }
 
   return response.json()
 }
 
-export interface Template {
-  id: string
-  name: string
-  tone: string
-  structure: Record<string, unknown>
-  created_at: string
-  updated_at: string
-}
-
-export async function getTemplates(): Promise<Template[]> {
+export async function getTemplates() {
+  const headers = await getAuthHeaders()
+  
   const response = await fetch(`${BACKEND_URL}/api/v1/templates`, {
-    credentials: 'include',
+    headers
   })
 
   if (!response.ok) {
-    throw new Error('Failed to fetch templates')
+    const error = await response.json()
+    throw error
   }
 
   return response.json()
 }
 
-export async function createTemplate(name: string, tone: string, structure: Record<string, unknown>): Promise<Template> {
+export async function saveTemplate(data: { name: string, tone: string, structure: any }) {
+  const headers = await getAuthHeaders()
+  
   const response = await fetch(`${BACKEND_URL}/api/v1/templates`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({ name, tone, structure }),
+    headers,
+    body: JSON.stringify(data)
   })
 
   if (!response.ok) {
-    throw new Error('Failed to create template')
+    const error = await response.json()
+    throw error
   }
 
   return response.json()
 }
 
-export async function deleteTemplate(id: string): Promise<void> {
+export async function deleteTemplate(id: string) {
+  const headers = await getAuthHeaders()
+  
   const response = await fetch(`${BACKEND_URL}/api/v1/templates/${id}`, {
     method: 'DELETE',
-    credentials: 'include',
+    headers
   })
 
   if (!response.ok) {
-    throw new Error('Failed to delete template')
+    const error = await response.json()
+    throw error
   }
+
+  return response.json()
 }

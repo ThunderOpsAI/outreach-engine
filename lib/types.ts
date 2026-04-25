@@ -71,3 +71,10 @@ export interface UserContext {
   plan: Plan
   credits: number
 }
+
+export interface Template {
+  id: string
+  name: string
+  tone: string
+  structure: GenerateOutput
+}

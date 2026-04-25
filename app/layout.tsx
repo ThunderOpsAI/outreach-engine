@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-import { Providers } from '../components/Providers.js'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Outreach Engine',
-  description: 'Generate personalized outreach messages',
+  description: 'AI-powered outreach message generator',
 }
 
 export default function RootLayout({
@@ -15,9 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
+        <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
           {children}
-        </Providers>
+        </main>
       </body>
     </html>
   )

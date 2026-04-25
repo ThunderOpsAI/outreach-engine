@@ -1,116 +1,105 @@
+'use client'
+
 import { useState } from 'react'
-import type { GenerateRequest, Tone } from '../lib/types.js'
+import type { GenerateRequest, Tone } from '@/lib/types'
 
 interface GenerateFormProps {
-  onSubmit: (request: GenerateRequest) => void
+  onSubmit: (data: GenerateRequest) => Promise<void>
   loading: boolean
 }
 
-export function GenerateForm({ onSubmit, loading }: GenerateFormProps) {
-  const [companyName, setCompanyName] = useState('')
-  const [offer, setOffer] = useState('')
-  const [companyUrl, setCompanyUrl] = useState('')
-  const [targetName, setTargetName] = useState('')
-  const [role, setRole] = useState('')
-  const [tone, setTone] = useState<Tone>('direct')
-  const [templateId, setTemplateId] = useState('')
+export default function GenerateForm({ onSubmit, loading }: GenerateFormProps) {
+  const [formData, setFormData] = useState<GenerateRequest>({
+    company_name: '',
+    offer: '',
+    company_url: '',
+    target_name: '',
+    role: '',
+    tone: 'direct'
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev: GenerateRequest) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const request: GenerateRequest = {
-      company_name: companyName,
-      offer,
-      ...(companyUrl && { company_url: companyUrl }),
-      ...(targetName && { target_name: targetName }),
-      ...(role && { role }),
-      tone,
-      ...(templateId && { template_id: templateId }),
-    }
-    onSubmit(request)
+    await onSubmit(formData)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <div>
-        <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-          Company Name *
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Company Name *</label>
         <input
-          type="text"
-          id="companyName"
-          value={companyName}
-          onChange={(e) => setCompanyName(e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          name="company_name"
+          value={formData.company_name}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
         />
       </div>
 
       <div>
-        <label htmlFor="offer" className="block text-sm font-medium text-gray-700">
-          Offer / Service *
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Offer / Service *</label>
         <textarea
-          id="offer"
-          value={offer}
-          onChange={(e) => setOffer(e.target.value)}
           required
+          name="offer"
+          value={formData.offer}
+          onChange={handleChange}
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
         />
       </div>
 
-      <div>
-        <label htmlFor="companyUrl" className="block text-sm font-medium text-gray-700">
-          Company URL
-        </label>
-        <input
-          type="url"
-          id="companyUrl"
-          value={companyUrl}
-          onChange={(e) => setCompanyUrl(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Company URL (optional)</label>
+          <input
+            type="url"
+            name="company_url"
+            value={formData.company_url}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Target Name (optional)</label>
+          <input
+            name="target_name"
+            value={formData.target_name}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          />
+        </div>
       </div>
 
       <div>
-        <label htmlFor="targetName" className="block text-sm font-medium text-gray-700">
-          Target Name
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Role/Title (optional)</label>
         <input
-          type="text"
-          id="targetName"
-          value={targetName}
-          onChange={(e) => setTargetName(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-          Role/Title
-        </label>
-        <input
-          type="text"
-          id="role"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Tone</label>
-        <div className="mt-2 space-x-4">
-          {(['casual', 'formal', 'direct'] as const).map((t) => (
+        <div className="mt-2 flex space-x-4">
+          {(['casual', 'formal', 'direct'] as Tone[]).map((t) => (
             <label key={t} className="inline-flex items-center">
               <input
                 type="radio"
+                name="tone"
                 value={t}
-                checked={tone === t}
-                onChange={(e) => setTone(e.target.value as Tone)}
-                className="text-indigo-600 focus:ring-indigo-500"
+                checked={formData.tone === t}
+                onChange={handleChange}
+                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
               />
-              <span className="ml-2 capitalize">{t}</span>
+              <span className="ml-2 text-sm text-gray-700 capitalize">{t}</span>
             </label>
           ))}
         </div>
@@ -119,9 +108,9 @@ export function GenerateForm({ onSubmit, loading }: GenerateFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
       >
-        {loading ? 'Generating...' : 'Generate'}
+        {loading ? 'Generating...' : 'Generate →'}
       </button>
     </form>
   )
