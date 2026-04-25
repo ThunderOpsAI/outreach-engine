@@ -33,7 +33,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   try {
-    const scraperPath = join(__dirname, '../../../scripts/pipeline.py');
+    const scraperPath = join(process.cwd(), 'scripts', 'pipeline.py');
     if (existsSync(scraperPath)) checks.scraper = 'ok';
   } catch (err) {
     console.error('Health check Scraper error:', err);

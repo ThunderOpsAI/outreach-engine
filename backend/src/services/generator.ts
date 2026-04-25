@@ -53,12 +53,21 @@ async function runPrompt<T>(prompt: string, maxTokens: number = 1000): Promise<T
   try {
     return await callLLM(false);
   } catch (err) {
+    if (!(err instanceof SyntaxError)) {
+      throw new GenerationError(`Generation provider request failed: ${(err as Error).message}`);
+    }
+
     console.warn('Failed to parse JSON on first attempt, retrying with strict prompt:', err);
+
     try {
       return await callLLM(true);
     } catch (err2) {
-      console.error('Failed to parse JSON on second attempt:', err2);
-      throw new GenerationError(`Failed to generate valid JSON: ${(err2 as Error).message}`);
+      if (err2 instanceof SyntaxError) {
+        console.error('Failed to parse JSON on second attempt:', err2);
+        throw new GenerationError(`Failed to generate valid JSON: ${err2.message}`);
+      }
+
+      throw new GenerationError(`Generation provider request failed: ${(err2 as Error).message}`);
     }
   }
 }

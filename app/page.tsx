@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { generateOutreach, saveTemplate } from '@/lib/api'
 import type { GenerateResponse, GenerateRequest, Template } from '@/lib/types'
@@ -11,6 +12,7 @@ import { convertToCSV, downloadFile } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
 
 export default function Dashboard() {
+  const searchParams = useSearchParams()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
@@ -36,6 +38,13 @@ export default function Dashboard() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error === 'auth_callback') {
+      setAuthError('Login could not be completed. Request a new magic link and try again.')
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { Redis } from 'ioredis';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: './backend/.env', quiet: true });
 
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 const redis = new Redis(redisUrl);

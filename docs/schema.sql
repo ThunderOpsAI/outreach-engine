@@ -74,3 +74,40 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 7. Credit helpers
+CREATE OR REPLACE FUNCTION decrement_credit(user_id UUID)
+RETURNS INTEGER AS $$
+DECLARE
+  new_credits INTEGER;
+BEGIN
+  UPDATE profiles
+  SET credits = credits - 1
+  WHERE id = user_id AND credits > 0
+  RETURNING credits INTO new_credits;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'NO_CREDITS';
+  END IF;
+
+  RETURN new_credits;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION increment_credit(user_id UUID)
+RETURNS INTEGER AS $$
+DECLARE
+  new_credits INTEGER;
+BEGIN
+  UPDATE profiles
+  SET credits = credits + 1
+  WHERE id = user_id
+  RETURNING credits INTO new_credits;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'PROFILE_NOT_FOUND';
+  END IF;
+
+  RETURN new_credits;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

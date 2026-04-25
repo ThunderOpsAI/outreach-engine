@@ -9,7 +9,7 @@ import healthRoute from './src/routes/health.js';
 import generateRoute from './src/routes/generate.js';
 import templatesRoute from './src/routes/templates.js';
 
-dotenv.config({ path: './backend/.env' });
+dotenv.config({ path: './backend/.env', quiet: true });
 
 const app = express();
 const port = process.env.PORT || 3001;

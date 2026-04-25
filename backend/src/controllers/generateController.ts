@@ -147,6 +147,14 @@ export async function generateOutreach(req: Request, res: Response) {
     if (user.plan !== 'agency') {
       await refundCredit(user.user_id, dummyProjectId).catch(e => console.error('Refund failed', e));
     }
+    if (err instanceof GenerationError) {
+      return res.status(503).json({
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'Generation provider is currently unavailable',
+        request_id: requestId,
+      } as GatewayError);
+    }
+
     return res.status(500).json({ code: 'GENERATION_FAILED', message: 'Generation failed', request_id: requestId } as GatewayError);
   }
 }
