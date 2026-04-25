@@ -1,4 +1,4 @@
-import type { GenerateOutput } from '../backend/src/types/index.js';
+import type { GenerateOutput } from './types.js';
 
 export function convertToCSV(output: GenerateOutput): string {
   const rows = [];
